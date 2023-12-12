@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3",
-    "node-telegram-bot-api": "^0.61.0",
+    "grammy": "^1.19.2",
     "nodemon": "^2.0.22",
     "openai": "^3.2.1"
   },

@@ -1,5 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
-import TelegramBot from "node-telegram-bot-api";
+import { Bot } from "grammy";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -13,22 +13,22 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-const bot = new TelegramBot(process.env.BOTKEY, { polling: true });
+const bot = new Bot(process.env.BOTKEY);
 
 const systemMessage = 'You are a helpful assistant.';
 let userMessages = [];
 
-bot.on('message', async (msg) => {
+bot.on('message', async (ctx) => {
     try {
         // Check if the user wants to delete the context
-        if (msg.text.toLowerCase() === '/deletecontext') {
+        if (ctx.message.text.toLowerCase() === '/deletecontext') {
             userMessages = []; // Clear the context
-            bot.sendMessage(msg.chat.id, 'Context deleted.');
+            await ctx.reply('Context deleted.');
             return;
         }
 
         // Add user message to the context
-        userMessages.push({ role: 'user', content: msg.text });
+        userMessages.push({ role: 'user', content: ctx.message.text });
 
         // Create chat completion
         const response = await openai.createChatCompletion({
@@ -39,8 +39,10 @@ bot.on('message', async (msg) => {
         });
 
         // send a message to the chat acknowledging receipt of their message
-        bot.sendMessage(msg.chat.id, response.data.choices[0].message.content);
+        await ctx.reply(response.data.choices[0].message.content);
     } catch (error) {
-        bot.sendMessage(msg.chat.id, error.message);
+        await ctx.reply(error.message);
     }
 });
+
+bot.start();
